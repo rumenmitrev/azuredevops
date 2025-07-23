@@ -3,7 +3,6 @@ trigger:
 
 pool: laptop
 
-
 stages:
 - stage: Build
   displayName: 'Build Stage'
@@ -11,32 +10,19 @@ stages:
   - job: BuildJob
     displayName: 'Build Job'
     steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'terraform'
-        scriptType: ps
-        scriptLocation: inlineScript
-        inlineScript: |
-          az account show
-    - script: |
-        az --version
-      displayName: 'Check Azure CLI version'
-    - script: |
-        echo "Restoring project dependencies..."
-      displayName: 'Restore dependencies'
+    - powershell: |
+        terraform --version
+      displayName: 'Check Terraform Version'
 
-    - script: |
-        echo "Running unit tests..."
-      displayName: 'Run unit tests'
 
-- stage: WSL
-  displayName: 'WSL Test'
-  jobs:
-  - job: WSLJob
-    displayName: 'WSL Job'
-    steps:
-    - script: |
-        wsl ps aux
-        wsl pwd
-        wsl ls -sail
-      displayName: 'Run WSL commands'
+# - stage: WSL
+#   displayName: 'WSL Test'
+#   jobs:
+#   - job: WSLJob
+#     displayName: 'WSL Job'
+#     steps:
+#     - script: |
+#         wsl ps aux
+#         wsl pwd
+#         wsl ls -sail
+#       displayName: 'Run WSL commands'
