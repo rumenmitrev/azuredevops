@@ -12,6 +12,8 @@ stages:
     steps:
     - powershell: |
         terraform.exe --version
+        terraform init
+        terraform plan -out=tfplan
       env:
         PATH: 'C:\terraform;$(PATH)'
       displayName: 'Check Terraform Version'
