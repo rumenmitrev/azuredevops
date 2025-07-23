@@ -3,6 +3,7 @@ trigger:
 
 pool: laptop
 
+
 stages:
 - stage: Build
   displayName: 'Build Stage'
