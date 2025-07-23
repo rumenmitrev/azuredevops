@@ -3,6 +3,15 @@ trigger:
 
 pool: laptop
 
+variables:
+  TF_PATH: 'C:\terraform'
+  TF_VAR_client_id: $(client_id)
+  TF_VAR_client_secret: $(client_secret)
+  TF_VAR_location: $(location)
+  TF_VAR_subscription_id: $(subscription_id)
+  TF_VAR_tenant_id: $(tenant_id)
+  PATH: 'C:\terraform;$(PATH)'
+
 stages:
 - stage: Build
   displayName: 'Build Stage'
@@ -15,13 +24,13 @@ stages:
         terraform.exe --version
         terraform init
         terraform plan -out=tfplan
-      env:
-        PATH: 'C:\terraform;$(PATH)'
-        TF_VAR_client_secret: $(client_secret)
-        TF_VAR_location: $(location)
-        TF_VAR_subscription_id: $(subscription_id)
-        TF_VAR_tenant_id: $(tenant_id)
-        TF_VAR_client_id: $(client_id)
+      # env:
+      #   PATH: 'C:\terraform;$(PATH)'
+      #   TF_VAR_client_secret: $(client_secret)
+      #   TF_VAR_location: $(location)
+      #   TF_VAR_subscription_id: $(subscription_id)
+      #   TF_VAR_tenant_id: $(tenant_id)
+      #   TF_VAR_client_id: $(client_id)
       displayName: 'Check Terraform Version'
 
 
