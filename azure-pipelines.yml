@@ -37,7 +37,7 @@ stages:
       artifact: terraformplan
     - powershell: |
         az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe apply -auto-approve tfplan
+        terraform.exe apply -auto-approve "$(Pipeline.Workspace)/terraformplan/tfplan"
       env:
         PATH: 'C:\terraform;$(PATH)'
         TF_VAR_client_secret: $(client_secret)
