@@ -25,6 +25,12 @@ stages:
       displayName: 'Check Terraform Version'
     - publish: tfplan
       artifact: terraformplan
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '.terraform'
+        artifact: terraformcache
+        publishLocation: 'pipeline'
+      displayName: 'Publish Terraform Provider Cache'
 
 - stage: Apply
   displayName: 'Terraform Apply'
@@ -35,9 +41,11 @@ stages:
     steps:
     - download: current
       artifact: terraformplan
+    - download: current
+      artifact: terraformcache
     - powershell: |
+        Copy-Item -Path "$(Pipeline.Workspace)/terraformcache" -Destination ".terraform" -Recurse -Force
         az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe init
         terraform.exe apply -auto-approve "$(Pipeline.Workspace)/terraformplan/tfplan"
       env:
         PATH: 'C:\terraform;$(PATH)'
@@ -55,9 +63,11 @@ stages:
   - job: DestroyJob
     displayName: 'Run terraform destroy'
     steps:
+    - download: current
+      artifact: terraformcache
     - powershell: |
+        Copy-Item -Path "$(Pipeline.Workspace)/terraformcache" -Destination ".terraform" -Recurse -Force
         az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe init
         terraform.exe destroy -auto-approve
       env:
         PATH: 'C:\terraform;$(PATH)'
