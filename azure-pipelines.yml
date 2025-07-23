@@ -11,6 +11,7 @@ stages:
     displayName: 'Build Job'
     steps:
     - powershell: |
+        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
         terraform.exe --version
         terraform init
         terraform plan -out=tfplan
