@@ -11,7 +11,7 @@ stages:
     displayName: 'Build Job'
     steps:
     - powershell: |
-        terraform --version
+        terraform.exe --version
       displayName: 'Check Terraform Version'
 
 
