@@ -8,6 +8,8 @@ stages:
   displayName: 'Build Stage'
   jobs:
   - job: BuildJob
+    env:
+      PATH: 'C:\terraform;$(PATH)'
     displayName: 'Build Job'
     steps:
     - powershell: |
