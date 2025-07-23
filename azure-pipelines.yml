@@ -15,4 +15,14 @@ stages:
       displayName: 'Restore dependencies'
     - script: |
         echo "Running unit tests..."
-      displayName: 'Run unit tests'
+      displayName: 'Run unit tests'    
+- stage: WSL
+  displayName: 'wsl test'
+  jobs:
+  - job: WSLJob
+    displayName: 'WSLJob'
+    steps:
+    - script: |
+        wsl ps aux
+        wsl pwd
+        wsl ls -sail
