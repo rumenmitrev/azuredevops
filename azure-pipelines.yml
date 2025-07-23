@@ -3,6 +3,16 @@ trigger:
 
 pool: laptop
 
+variables:
+  - name: client_secret
+    value: $(client_secret)
+  - name: location
+    value: $(location)
+  - name: subscription_id
+    value: $(subscription_id)
+  - name: tenant_id
+    value: $(tenant_id)
+
 stages:
 - stage: Build
   displayName: 'Build Stage'
@@ -16,6 +26,10 @@ stages:
         terraform plan -out=tfplan
       env:
         PATH: 'C:\terraform;$(PATH)'
+        TF_VAR_client_secret: $(client_secret)
+        TF_VAR_location: $(location)
+        TF_VAR_subscription_id: $(subscription_id)
+        TF_VAR_tenant_id: $(tenant_id)
       displayName: 'Check Terraform Version'
 
 
