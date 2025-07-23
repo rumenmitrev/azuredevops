@@ -3,16 +3,6 @@ trigger:
 
 pool: laptop
 
-variables:
-  - name: client_secret
-    value: $(client_secret)
-  - name: location
-    value: $(location)
-  - name: subscription_id
-    value: $(subscription_id)
-  - name: tenant_id
-    value: $(tenant_id)
-
 stages:
 - stage: Build
   displayName: 'Build Stage'
