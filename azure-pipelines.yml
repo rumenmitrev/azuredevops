@@ -10,7 +10,6 @@ variables:
   TF_VAR_location: $(location)
   TF_VAR_subscription_id: $(subscription_id)
   TF_VAR_tenant_id: $(tenant_id)
-  PATH: 'C:\terraform;$(PATH)'
 
 stages:
 - stage: Build
@@ -24,8 +23,8 @@ stages:
         terraform.exe --version
         terraform init
         terraform plan -out=tfplan
-      # env:
-      #   PATH: 'C:\terraform;$(PATH)'
+      env:
+        PATH: 'C:\terraform;$(PATH)'
       #   TF_VAR_client_secret: $(client_secret)
       #   TF_VAR_location: $(location)
       #   TF_VAR_subscription_id: $(subscription_id)
