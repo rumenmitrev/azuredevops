@@ -23,6 +23,50 @@ stages:
         TF_VAR_tenant_id: $(tenant_id)
         TF_VAR_client_id: $(client_id)
       displayName: 'Check Terraform Version'
+    - publish: tfplan
+      artifact: terraformplan
+
+- stage: Apply
+  displayName: 'Terraform Apply'
+  dependsOn: Build
+  jobs:
+  - job: ApplyJob
+    displayName: 'Run terraform apply'
+    steps:
+    - download: current
+      artifact: terraformplan
+    - powershell: |
+        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
+        terraform.exe apply -auto-approve tfplan
+      env:
+        PATH: 'C:\terraform;$(PATH)'
+        TF_VAR_client_secret: $(client_secret)
+        TF_VAR_location: $(location)
+        TF_VAR_subscription_id: $(subscription_id)
+        TF_VAR_tenant_id: $(tenant_id)
+        TF_VAR_client_id: $(client_id)
+      displayName: 'Terraform Apply'
+- stage: Destroy
+  displayName: 'Terraform Destroy'
+  dependsOn: Apply
+  condition: succeeded()
+  jobs:
+  - job: DestroyJob
+    displayName: 'Run terraform destroy'
+    steps:
+    - powershell: |
+        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
+        terraform.exe destroy -auto-approve
+      env:
+        PATH: 'C:\terraform;$(PATH)'
+        TF_VAR_client_secret: $(client_secret)
+        TF_VAR_location: $(location)
+        TF_VAR_subscription_id: $(subscription_id)
+        TF_VAR_tenant_id: $(tenant_id)
+        TF_VAR_client_id: $(client_id)
+      displayName: 'Terraform Destroy'
+
+
 
 
 # - stage: WSL
