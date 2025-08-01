@@ -1,94 +1,50 @@
+name: Terraform deploy Log Analytics
+
 trigger:
-- main
+  - main
 
 pool: laptop
 
+variables:
+  azureServiceConnection: 'terra'  
+
 stages:
-- stage: Build
-  displayName: 'Build Stage'
-  jobs:
-  - job: BuildJob
-    displayName: 'Build Job'
-    steps:
-    - powershell: |
-        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe --version
-        terraform init
-        terraform plan -out=tfplan
-      env:
-        PATH: 'C:\terraform;$(PATH)'
-        TF_VAR_client_secret: $(client_secret)
-        TF_VAR_location: $(location)
-        TF_VAR_subscription_id: $(subscription_id)
-        TF_VAR_tenant_id: $(tenant_id)
-        TF_VAR_client_id: $(client_id)
-      displayName: 'Check Terraform Version'
-    - publish: tfplan
-      artifact: terraformplan
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '.terraform'
-        artifact: terraformcache
-        publishLocation: 'pipeline'
-      displayName: 'Publish Terraform Provider Cache'
-
-- stage: Apply
-  displayName: 'Terraform Apply'
-  dependsOn: Build
-  jobs:
-  - job: ApplyJob
-    displayName: 'Run terraform apply'
-    steps:
-    - download: current
-      artifact: terraformplan
-    - download: current
-      artifact: terraformcache
-    - powershell: |
-        Copy-Item -Path "$(Pipeline.Workspace)/terraformcache" -Destination ".terraform" -Recurse -Force
-        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe apply -auto-approve "$(Pipeline.Workspace)/terraformplan/tfplan"
-      env:
-        PATH: 'C:\terraform;$(PATH)'
-        TF_VAR_client_secret: $(client_secret)
-        TF_VAR_location: $(location)
-        TF_VAR_subscription_id: $(subscription_id)
-        TF_VAR_tenant_id: $(tenant_id)
-        TF_VAR_client_id: $(client_id)
-      displayName: 'Terraform Apply'
-- stage: Destroy
-  displayName: 'Terraform Destroy'
-  dependsOn: Apply
-  condition: succeeded()
-  jobs:
-  - job: DestroyJob
-    displayName: 'Run terraform destroy'
-    steps:
-    - download: current
-      artifact: terraformcache
-    - powershell: |
-        Copy-Item -Path "$(Pipeline.Workspace)/terraformcache" -Destination ".terraform" -Recurse -Force
-        az login --service-principal -u $(client_id) -p $(client_secret) --tenant $(tenant_id)
-        terraform.exe destroy -auto-approve
-      env:
-        PATH: 'C:\terraform;$(PATH)'
-        TF_VAR_client_secret: $(client_secret)
-        TF_VAR_location: $(location)
-        TF_VAR_subscription_id: $(subscription_id)
-        TF_VAR_tenant_id: $(tenant_id)
-        TF_VAR_client_id: $(client_id)
-      displayName: 'Terraform Destroy'
-
-
-
-
-# - stage: WSL
-#   displayName: 'WSL Test'
-#   jobs:
-#   - job: WSLJob
-#     displayName: 'WSL Job'
-#     steps:
-#     - script: |
-#         wsl ps aux
-#         wsl pwd
-#         wsl ls -sail
-#       displayName: 'Run WSL commands'
+  - stage: Plan
+    displayName: 'Terraform Plan'
+    jobs:
+      - job: TerraformPlan
+        displayName: 'Terraform Plan'
+        steps:
+          # Step 1: Initialize and Plan Terraform
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureServiceConnection)  # The service connection defined in your pipeline
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                echo "Setting up Azure authentication using the service principal credentials from the service connection"
+                echo "Terraform init..."
+                terraform init
+                echo "Terrform plan..."
+                terraform plan
+            displayName: 'Terraform init and plan'
+          
+          # Step 2: Deploy
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureServiceConnection)  # The service connection defined in your pipeline
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                echo "Terraform apply"
+                terraform apply -auto-approve
+            displayName: 'Terraform apply'
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureServiceConnection)  # The service connection defined in your pipeline
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                echo "Terraform apply"
+                terraform destroy -auto-approve
+            displayName: 'Terraform destroy'
